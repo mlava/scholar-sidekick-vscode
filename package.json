@@ -1,0 +1,114 @@
+{
+  "name": "scholar-sidekick-vscode",
+  "displayName": "Scholar Sidekick — Citation Verifier",
+  "description": "Verify your .bib bibliography for fabricated citations, retractions, and open-access status — inline, before you submit.",
+  "version": "0.1.0",
+  "publisher": "scholar-sidekick",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Other"
+  ],
+  "keywords": [
+    "bibtex",
+    "citation",
+    "bibliography",
+    "doi",
+    "latex",
+    "quarto",
+    "retraction",
+    "fabricated citation"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mlava/scholar-sidekick-vscode"
+  },
+  "homepage": "https://scholar-sidekick.com",
+  "main": "./out/extension.js",
+  "activationEvents": [
+    "onLanguage:bibtex"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "bibtex",
+        "aliases": [
+          "BibTeX",
+          "bibtex"
+        ],
+        "extensions": [
+          ".bib"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "scholarSidekick.verifyFile",
+        "title": "Scholar Sidekick: Verify Bibliography (current file)"
+      },
+      {
+        "command": "scholarSidekick.verifyWorkspace",
+        "title": "Scholar Sidekick: Verify Bibliography (workspace)"
+      },
+      {
+        "command": "scholarSidekick.clearDiagnostics",
+        "title": "Scholar Sidekick: Clear verification results"
+      }
+    ],
+    "configuration": {
+      "title": "Scholar Sidekick",
+      "properties": {
+        "scholarSidekick.apiBase": {
+          "type": "string",
+          "default": "https://scholar-sidekick.com",
+          "description": "Base URL of the Scholar Sidekick API."
+        },
+        "scholarSidekick.apiKey": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Optional Scholar Sidekick API key (`ssk_…`). Sent as a Bearer token for higher rate limits. Leave blank to use the anonymous free tier."
+        },
+        "scholarSidekick.verifyOnSave": {
+          "type": "boolean",
+          "default": true,
+          "description": "Verify a .bib file automatically when it is saved."
+        },
+        "scholarSidekick.checkRetraction": {
+          "type": "boolean",
+          "default": true,
+          "description": "Flag retracted works and expressions of concern (Crossref / Retraction Watch)."
+        },
+        "scholarSidekick.checkOpenAccess": {
+          "type": "boolean",
+          "default": false,
+          "description": "Surface open-access status and the best legal URL (Unpaywall). Off by default — adds an extra upstream lookup per entry."
+        },
+        "scholarSidekick.maxConcurrency": {
+          "type": "number",
+          "default": 4,
+          "minimum": 1,
+          "maximum": 8,
+          "description": "Maximum number of entries verified in parallel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile",
+    "package": "vsce package",
+    "test": "vitest run",
+    "lint": "eslint src --ext ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^3.2.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}

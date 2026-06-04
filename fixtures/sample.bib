@@ -1,0 +1,27 @@
+% Sample bibliography for manually testing the Scholar Sidekick extension.
+% Open this file and run "Scholar Sidekick: Verify Bibliography".
+
+% Genuine entry — should verify as matched + open access.
+@article{harris2020numpy,
+  title   = {Array programming with NumPy},
+  author  = {Harris, Charles R. and Millman, K. Jarrod},
+  journal = {Nature},
+  year    = {2020},
+  doi     = {10.1038/s41586-020-2649-2}
+}
+
+% Fabrication pattern: a real DOI (the NumPy paper) with an invented title.
+% Should flag as a possible fabricated citation (mismatch).
+@article{fabricated2021,
+  title  = {Deep learning approaches to widget synthesis in clinical trials},
+  author = {Smith, Jane and Doe, John},
+  year   = 2021,
+  doi    = {10.1038/s41586-020-2649-2}
+}
+
+% No resolvable identifier — should be reported as unverifiable, not "clean".
+@book{knuth1984,
+  title  = {The TeXbook},
+  author = {Knuth, Donald E.},
+  year   = {1984}
+}
