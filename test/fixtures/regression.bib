@@ -1,0 +1,53 @@
+% Curated real-world entries used as parser/claim regression cases.
+% Pure offline fixtures — these are NOT verified against the live API in tests.
+% Each entry exercises a distinct parsing or identifier-extraction path.
+
+% 100+ authors, diacritics (Nägele, Wißing), and "Family, Given"-with-quirks —
+% the parser must not choke and buildClaim must cap authors at 50.
+@article{Posth2023s4158602,
+  author = {Posth, C and Yu, H and Ghalichi, A and Rougier, H and Crevecoeur, I and Huang, Y and Ringbauer, H and Rohrlach, AB and Nägele, K and Villalba-Mouco, V and Radzeviciute, R and Ferraz, T and Stoessel, A and Tukhbatova, R and Drucker, DG and Lari, M and Modi, A and Vai, S and Saupe, T and Scheib, CL and Catalano, G and Pagani, L and Talamo, S and Fewlass, H and Klaric, L and Morala, A and Rué, M and Madelaine, S and Crépin, L and Caverne, JB and Bocaege, E and Ricci, S and Boschin, F and Bayle, P and Maureille, B and Bordes, JG and Oxilia, G and Bortolini, E and Bignon-Lau, O and Debout, G and Orliac, M and Zazzo, A and Sparacello, V and Starnini, E and Sineo, L and Pecqueur, L and Merceron, G and Garcia, G and Leuvrey, JM and Garcia, CB and Gómez-Olivencia, A and Storm, P and Hoffmann, C and Kabaciński, J and Filimonova, T and Shnaider, S and Berezina, N and Marín-Arroyo, AB and López, B and Ronchitelli, A and Polet, C and Jadin, I and Cauwe, N and Soler, J and Coromina, N and Rufí, I and Cottiaux, R and Clark, G and Straus, LG and Julien, MA and Renhart, S and Talaa, D and Benazzi, S and Romandini, M and Amkreutz, L and Bocherens, H and Wißing, C and Villotte, S and Bodu, P and Smits, L and Souffi, B and Jankauskas, R and Kozakaitė, J and Cupillard, C and Benthien, H and Wehrberger, K and Schmitz, RW and Feine, SC and Schüler, T and Thevenet, C and Grigorescu, D and Lüth, F and Kotula, A and Piezonka, H and Schopper, F and Svoboda, J and Sázelová, S and Chizhevsky, A and Khokhlov, A and Conard, NJ and Valentin, F and Harvati, K and Semal, P and Jungklaus, B and Suvorov, A and Schulting, R and Moiseyev, V and Mannermaa, K and Buzhilova, A and Terberger, T and Caramelli, D and Altena, E and Haak, W and Krause, J},
+  title = {Palaeogenomics of Upper Palaeolithic to Neolithic European hunter-gatherers.},
+  journal = {Nature},
+  year = {2023},
+  volume = {615},
+  number = {7950},
+  pages = {117--126},
+  doi = {10.1038/s41586-023-05726-0},
+  url = {https://pubmed.ncbi.nlm.nih.gov/36859578/}
+}
+
+% ISBN book — bestId should be the ISBN; no DOI present.
+@book{Barnes2000,
+  author = {Barnes, Jonathan},
+  title = {Aristotle},
+  year = {2000},
+  isbn = {9780192854087},
+  url = {https://openlibrary.org/isbn/9780192854087}
+}
+
+% DOI plus an ADS bibcode that lives in a `note` field (with an escaped \&).
+% DOI must be extracted; the bibcode in `note` is deliberately NOT parsed.
+@article{2019AA625A135L,
+  author = {Lallement, R. and Babusiaux, C. and Vergely, J. L. and Katz, D.},
+  title = {Gaia-2MASS 3D maps of Galactic interstellar dust within 3 kpc},
+  journal = {Astronomy and Astrophysics},
+  year = {2019},
+  volume = {625},
+  pages = {A135},
+  doi = {10.1051/0004-6361/201834695},
+  note = {ADS bibcode: 2019A\&A...625A.135L}
+}
+
+% A `doi` field alongside a PubMed `url`: the DOI must come from the field,
+% not be re-derived from the URL.
+@article{JacksonBest2018s1288901,
+  author = {Jackson-Best, F and Edwards, N},
+  title = {Stigma and intersectionality: a systematic review of systematic reviews across HIV/AIDS, mental illness, and physical disability.},
+  journal = {BMC public health},
+  year = {2018},
+  volume = {18},
+  number = {1},
+  pages = {919},
+  doi = {10.1186/s12889-018-5861-3},
+  url = {https://pubmed.ncbi.nlm.nih.gov/30049270/}
+}
