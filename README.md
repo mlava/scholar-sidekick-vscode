@@ -14,12 +14,12 @@ Cursor, Windsurf, and Positron): **LaTeX** authors using LaTeX Workshop and
 
 ## What it does
 
-For each entry in a `.bib` file it calls the [Scholar Sidekick](https://scholar-sidekick.com)
-API and surfaces:
+For each entry in a `.bib` file it calls the
+[Scholar Sidekick REST API](https://scholar-sidekick.com/docs) and surfaces:
 
 | Signal | How it shows up |
 | --- | --- |
-| 🔴 **Possible fabrication** — the title doesn't match the work at the DOI/PMID/… (the [Topaz et al. 2026](https://scholar-sidekick.com) pattern: a real identifier with an invented title) | Error squiggle + Problems panel |
+| 🔴 **Possible fabrication** — the title doesn't match the work at the DOI/PMID/… (the [Topaz et al. 2026](https://doi.org/10.1016/S0140-6736(26)00603-3) pattern: a real identifier with an invented title) | Error squiggle + Problems panel |
 | 🟠 **Retracted** / expression of concern (Crossref + Retraction Watch) | Warning squiggle |
 | 🔵 **Unresolved / ambiguous** identifier | Info squiggle |
 | 📂 **Open access** status + best legal URL (Unpaywall) | Hover card |
