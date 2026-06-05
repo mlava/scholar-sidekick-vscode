@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Daily drift monitor (live-contract job below): are the `/api/*` paths this
+    # extension's client pins still documented in the website's published OpenAPI
+    # spec? See test/endpoint-contract.test.ts.
+    - cron: "0 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Compile + tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm run compile
+      # NOTE: `npm run lint` is intentionally omitted — the repo's lint script
+      # references eslint but it is not in devDependencies (pre-existing gap).
+      # Add eslint + config, then add `- run: npm run lint` here.
+      # Includes the offline endpoint-contract test: client paths == pinned list.
+      - run: npm test
+
+  live-contract:
+    name: Live OpenAPI contract (drift monitor)
+    runs-on: ubuntu-latest
+    # Monitor only — not a PR gate. It compares the LIVE published spec against
+    # the client's pinned paths, which is expected to differ right after a website
+    # change until it redeploys; gating PRs on it would couple them to deploy timing.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - name: Compare published OpenAPI paths to the client's pinned endpoints
+        env:
+          CHECK_LIVE_CONTRACT: "1"
+        run: npx vitest run test/endpoint-contract.test.ts
