@@ -1,7 +1,7 @@
 {
   "name": "scholar-sidekick-vscode",
-  "displayName": "Scholar Sidekick — Citation Verifier",
-  "description": "Verify your .bib bibliography for fabricated citations, retractions, and open-access status — inline, before you submit.",
+  "displayName": "Scholar Sidekick \u2014 Citation Verifier",
+  "description": "Verify your .bib bibliography for fabricated citations, retractions, and open-access status \u2014 inline, before you submit.",
   "version": "0.1.1",
   "publisher": "scholar-sidekick",
   "license": "MIT",
@@ -70,7 +70,7 @@
         "scholarSidekick.apiKey": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Optional Scholar Sidekick API key (`ssk_…`). Sent as a Bearer token for higher rate limits. Leave blank to use the anonymous free tier."
+          "markdownDescription": "Optional Scholar Sidekick API key (`ssk_\u2026`). Sent as a Bearer token for higher rate limits. Leave blank to use the anonymous free tier."
         },
         "scholarSidekick.verifyOnSave": {
           "type": "boolean",
@@ -85,7 +85,7 @@
         "scholarSidekick.checkOpenAccess": {
           "type": "boolean",
           "default": false,
-          "description": "Surface open-access status and the best legal URL (Unpaywall). Off by default — adds an extra upstream lookup per entry."
+          "description": "Surface open-access status and the best legal URL (Unpaywall). Off by default \u2014 adds an extra upstream lookup per entry."
         },
         "scholarSidekick.maxConcurrency": {
           "type": "number",
@@ -103,13 +103,17 @@
     "vscode:prepublish": "npm run compile",
     "package": "vsce package",
     "test": "vitest run",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint ."
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.5",
     "@types/node": "^20.19.0",
     "@types/vscode": "^1.85.0",
     "@vscode/vsce": "^3.2.0",
+    "eslint": "^9.39.5",
+    "globals": "^15.15.0",
     "typescript": "^5.6.0",
+    "typescript-eslint": "^8.66.0",
     "vitest": "^2.1.0"
   }
 }

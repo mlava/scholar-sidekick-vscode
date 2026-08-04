@@ -25,11 +25,10 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
+      - run: npm run lint
       - run: npm run compile
-      # NOTE: `npm run lint` is intentionally omitted — the repo's lint script
-      # references eslint but it is not in devDependencies (pre-existing gap).
-      # Add eslint + config, then add `- run: npm run lint` here.
-      # Includes the offline endpoint-contract test: client paths == pinned list.
+      # Includes the offline endpoint-contract test (client paths == pinned list)
+      # and the client-tag test (every request carries X-Scholar-Client).
       - run: npm test
 
   live-contract:
