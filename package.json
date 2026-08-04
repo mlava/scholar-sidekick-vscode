@@ -2,7 +2,7 @@
   "name": "scholar-sidekick-vscode",
   "displayName": "Scholar Sidekick — Citation Verifier",
   "description": "Verify your .bib bibliography for fabricated citations, retractions, and open-access status — inline, before you submit.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "scholar-sidekick",
   "license": "MIT",
   "engines": {
