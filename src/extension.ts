@@ -11,6 +11,7 @@ import {
 
 let diagnostics: vscode.DiagnosticCollection;
 let statusBar: vscode.StatusBarItem;
+let extensionVersion: string | undefined;
 
 // Per-document results, so the hover provider can look up by offset.
 const resultsByDoc = new Map<string, EntryResult[]>();
@@ -18,6 +19,15 @@ const resultsByDoc = new Map<string, EntryResult[]>();
 const inFlight = new Map<string, vscode.CancellationTokenSource>();
 
 export function activate(context: vscode.ExtensionContext): void {
+  // Captured once so config() — which has no access to the ExtensionContext —
+  // can complete the X-Scholar-Client handshake tag. Read from the extension
+  // host rather than a constant, so package.json stays the only place this
+  // extension's version is written.
+  extensionVersion =
+    typeof context.extension?.packageJSON?.version === "string"
+      ? context.extension.packageJSON.version
+      : undefined;
+
   diagnostics = vscode.languages.createDiagnosticCollection("scholarSidekick");
   statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   statusBar.command = "scholarSidekick.verifyFile";
@@ -103,6 +113,7 @@ function config(): Config {
   return {
     apiBase: c.get<string>("apiBase", "https://scholar-sidekick.com"),
     apiKey: c.get<string>("apiKey", ""),
+    clientVersion: extensionVersion,
     verifyOnSave: c.get<boolean>("verifyOnSave", true),
     checkRetraction: c.get<boolean>("checkRetraction", true),
     checkOpenAccess: c.get<boolean>("checkOpenAccess", false),
@@ -136,6 +147,7 @@ async function verifyDocument(doc: vscode.TextDocument): Promise<void> {
         runVerification(entries, {
           apiBase: cfg.apiBase,
           apiKey: cfg.apiKey,
+          clientVersion: cfg.clientVersion,
           checkRetraction: cfg.checkRetraction,
           checkOpenAccess: cfg.checkOpenAccess,
           maxConcurrency: cfg.maxConcurrency,

@@ -14,7 +14,33 @@ import type { Claim } from "../bib/claim";
 export interface ClientOptions {
   apiBase: string;
   apiKey: string;
+  /**
+   * This extension's version, used only to complete the `X-Scholar-Client`
+   * handshake tag. Optional on purpose: the tag is sent either way, so a caller
+   * that omits this loses the version in the server's usage record but never
+   * the surface attribution. See `clientTag()`.
+   */
+  clientVersion?: string;
   signal?: AbortSignal;
+}
+
+/** The client-tag suffix the server maps to the `vscode` usage surface. */
+const CLIENT_NAME = "scholar-sidekick-vscode";
+
+/**
+ * Build the `X-Scholar-Client` handshake tag.
+ *
+ * The server parses `scholar-sidekick-<name>[/<version>]` and maps `<name>`
+ * through a closed lookup table; an unrecognised name falls through to the
+ * generic `api` surface. Sending nothing at all is worse still — this extension
+ * previously sent no tag, so the `vscode` surface existed server-side and
+ * recorded zero rows, and its calls were indistinguishable from raw REST
+ * traffic. The tag is therefore unconditional, and only the version is optional
+ * (the server's grammar accepts a bare name).
+ */
+export function clientTag(version?: string): string {
+  const safe = version?.trim().match(/^[a-z0-9.+-]+$/i)?.[0];
+  return safe ? `${CLIENT_NAME}/${safe}` : CLIENT_NAME;
 }
 
 export type Verdict = "matched" | "mismatch" | "not_found" | "ambiguous";
@@ -100,6 +126,7 @@ async function post<T>(
   const headers: Record<string, string> = {
     "content-type": "application/json",
     accept: "application/json",
+    "x-scholar-client": clientTag(opts.clientVersion),
   };
   if (opts.apiKey) {
     headers.authorization = `Bearer ${opts.apiKey}`;
