@@ -84,16 +84,23 @@ export function buildDiagnostics(
           ),
         );
         break;
-      case "ambiguous":
+      case "ambiguous": {
+        // The server tells us WHICH field disagreed. Without it this always read
+        // "the work may exist under a different identifier", which is wrong for
+        // the common co-author case — there the identifier resolved perfectly.
+        const why = describeMismatches(result.verify?.mismatches);
         diagnostics.push(
           diag(
             range,
-            "Verification was ambiguous — the work may exist under a different identifier. Review manually.",
+            why
+              ? `Verification was ambiguous — ${why}. Review manually.`
+              : "Verification was ambiguous — the work may exist under a different identifier. Review manually.",
             vscode.DiagnosticSeverity.Information,
             "ambiguous",
           ),
         );
         break;
+      }
       case "error":
         // Rate-limit errors are reported once at the window level, not per entry.
         if (result.errorMessage && !/rate limit/i.test(result.errorMessage)) {
@@ -118,6 +125,49 @@ export function buildDiagnostics(
 function noticeSuffix(result: EntryResult): string {
   const source = result.retraction?.notices?.find((n) => n.source)?.source;
   return source ? ` (${source})` : "";
+}
+
+/** Field name → the phrasing a reader needs, rather than the wire name. */
+const MISMATCH_LABELS: Record<string, string> = {
+  title: "the title",
+  first_author: "the first author",
+  coauthor: "a co-author",
+  year: "the year",
+  container: "the journal",
+};
+
+/**
+ * Summarise the server's `mismatches[]` for a human.
+ *
+ * The response has always carried the specific field that disagreed; nothing
+ * rendered it, so users got a squiggle with no way to reach the reason.
+ */
+function describeMismatches(
+  mismatches: { field: string; claimed: unknown; resolved: unknown }[] | undefined,
+): string | null {
+  if (!mismatches || mismatches.length === 0) {
+    return null;
+  }
+  const fields = [...new Set(mismatches.map((m) => MISMATCH_LABELS[m.field] ?? m.field))];
+  const list =
+    fields.length === 1
+      ? fields[0]
+      : `${fields.slice(0, -1).join(", ")} and ${fields[fields.length - 1]}`;
+  return `${list} did not match the resolved record`;
+}
+
+/** Per-field claimed-vs-resolved diff for the hover card. Empty string when there is none. */
+function fieldDiffTable(
+  mismatches: { field: string; claimed: unknown; resolved: unknown }[] | undefined,
+): string {
+  if (!mismatches || mismatches.length === 0) {
+    return "";
+  }
+  const cell = (v: unknown) => (v === null || v === undefined || v === "" ? "—" : String(v));
+  const rows = mismatches
+    .map((m) => `| ${MISMATCH_LABELS[m.field] ?? m.field} | ${cell(m.claimed)} | ${cell(m.resolved)} |`)
+    .join("\n");
+  return `| Field | In your .bib | Resolved record |\n|---|---|---|\n${rows}\n\n`;
 }
 
 function diag(
@@ -156,13 +206,17 @@ export function buildHover(result: EntryResult): vscode.MarkdownString {
       if (result.verify?.matched?.title) {
         md.appendMarkdown(`Resolved title: *${result.verify.matched.title}*\n\n`);
       }
+      md.appendMarkdown(fieldDiffTable(result.verify?.mismatches));
       break;
     case "not_found":
       md.appendMarkdown("⚠️ **Not found** — identifier did not resolve.\n\n");
       break;
-    case "ambiguous":
-      md.appendMarkdown("❔ **Ambiguous** — review manually.\n\n");
+    case "ambiguous": {
+      const why = describeMismatches(result.verify?.mismatches);
+      md.appendMarkdown(`❔ **Ambiguous** — ${why ?? "review manually"}.\n\n`);
+      md.appendMarkdown(fieldDiffTable(result.verify?.mismatches));
       break;
+    }
     case "unverifiable":
       md.appendMarkdown(
         "➖ **Unverifiable** — no resolvable identifier (DOI/PMID/…) on this entry.\n\n",

@@ -39,7 +39,7 @@ export function buildClaim(entry: BibEntry): EntryClaim {
     claim.title = f.title;
   }
 
-  const authors = parseAuthors(f.author);
+  const authors = parseAuthors(entry.names?.author);
   if (authors.length > 0) {
     claim.authors = authors.slice(0, 50);
   }
@@ -94,22 +94,41 @@ export function buildClaim(entry: BibEntry): EntryClaim {
   };
 }
 
-function parseAuthors(raw: string | undefined): AuthorClaim[] {
-  if (!raw) {
+/**
+ * `others` is BibTeX's "et al." sentinel (`author = {Smith, John and others}`),
+ * not a person. Sending it as a claimed co-author makes the server look for
+ * someone named "others" on the resolved record, fail, and downgrade the verdict
+ * to `ambiguous` — a false review flag on a correctly-cited paper. Drop it.
+ */
+const NAME_SENTINELS = new Set(["others", "et al", "et al."]);
+
+function parseAuthors(names: string[] | undefined): AuthorClaim[] {
+  if (!names || names.length === 0) {
     return [];
   }
-  return raw
-    .split(/\s+and\s+/i)
+  return names
     .map((name) => name.trim())
-    .filter(Boolean)
+    .filter((name) => name && !NAME_SENTINELS.has(name.toLowerCase()))
     .map(parseOneAuthor);
 }
 
 function parseOneAuthor(name: string): AuthorClaim {
+  // Brace-wrapped by the parser = a protected corporate name. Atomic: the whole
+  // string is the "family" name, exactly as the registries hold it.
+  if (name.startsWith("{") && name.endsWith("}")) {
+    return { family: name.slice(1, -1).trim() };
+  }
+
   if (name.includes(",")) {
-    const [family, given] = name.split(",", 2).map((s) => s.trim());
+    // BibTeX name forms: "Last, First" and the 3-part "Last, Suffix, First".
+    // Splitting with a limit of 2 read the suffix as the given name, so
+    // "King, Jr., Martin Luther" lost "Martin Luther" entirely.
+    const parts = name.split(",").map((s) => s.trim());
+    const family = parts[0];
+    const given = (parts.length >= 3 ? parts[2] : parts[1]) || "";
     return given ? { family, given } : { family };
   }
+
   // "Given … Family" — last whitespace-separated token is the family name.
   const parts = name.split(/\s+/);
   if (parts.length === 1) {

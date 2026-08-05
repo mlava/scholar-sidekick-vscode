@@ -65,12 +65,14 @@
         "scholarSidekick.apiBase": {
           "type": "string",
           "default": "https://scholar-sidekick.com",
-          "description": "Base URL of the Scholar Sidekick API."
+          "scope": "machine",
+          "description": "Base URL of the Scholar Sidekick API. Machine-scoped so a checked-in .vscode/settings.json cannot redirect your API key to another host."
         },
         "scholarSidekick.apiKey": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Optional Scholar Sidekick API key (`ssk_\u2026`). Sent as a Bearer token for higher rate limits. Leave blank to use the anonymous free tier."
+          "scope": "machine",
+          "markdownDescription": "Optional Scholar Sidekick API key (`ssk_\u2026`). Sent as a Bearer token for higher rate limits. Leave blank to use the anonymous free tier. Machine-scoped: a workspace cannot set or read it."
         },
         "scholarSidekick.verifyOnSave": {
           "type": "boolean",
