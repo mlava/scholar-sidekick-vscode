@@ -160,3 +160,66 @@ describe("buildClaim", () => {
     expect(claim.authors).toEqual([{ family: "King", given: "Martin Luther" }]);
   });
 });
+
+describe("buildClaim — shortDOI", () => {
+  // A shortDOI (10/aabbe, minted at shortdoi.org) is a Handle alias for a full
+  // DOI. Before this was handled, `normalizeDoi` dropped it (it fails
+  // startsWith("10.")), so bestId was null and a perfectly good entry was
+  // reported as "unverifiable". The API expands it — but only if we send it.
+  it("accepts a bare shortDOI in the doi field", () => {
+    const { claim, bestId, hasIdentifier } = buildClaim(
+      entry({ title: "Hedges", journal: "J Philos Logic", year: "1973", doi: "10/aabbe" }),
+    );
+    expect(claim.doi).toBe("10/aabbe");
+    expect(bestId).toBe("10/aabbe");
+    expect(hasIdentifier).toBe(true);
+  });
+
+  it("strips a doi.org wrapper from a shortDOI", () => {
+    const { claim } = buildClaim(entry({ title: "T", doi: "https://doi.org/10/aabbe" }));
+    expect(claim.doi).toBe("10/aabbe");
+  });
+
+  it("strips a shortdoi.org wrapper", () => {
+    const { claim } = buildClaim(entry({ title: "T", doi: "https://shortdoi.org/10/aabbe" }));
+    expect(claim.doi).toBe("10/aabbe");
+  });
+
+  it("lowercases the token (the Handle registry is case-insensitive for these)", () => {
+    const { claim } = buildClaim(entry({ title: "T", doi: "10/AaBbE" }));
+    expect(claim.doi).toBe("10/aabbe");
+  });
+
+  it("picks a shortDOI out of the url field when there is no doi field", () => {
+    const { claim, bestId } = buildClaim(
+      entry({ title: "T", url: "https://doi.org/10/aabbe" }),
+    );
+    expect(claim.doi).toBe("10/aabbe");
+    expect(bestId).toBe("10/aabbe");
+  });
+
+  it("does NOT claim an all-numeric token as a shortDOI", () => {
+    // `10/2020` is a date or a fraction, not an identifier. A shortDOI token
+    // always contains a letter.
+    const { claim, hasIdentifier } = buildClaim(entry({ title: "T", doi: "10/2020" }));
+    expect(claim.doi).toBeUndefined();
+    expect(hasIdentifier).toBe(false);
+  });
+
+  it("does NOT treat a bare 10/xxxx path on an unrelated host as a shortDOI", () => {
+    const { claim } = buildClaim(entry({ title: "T", url: "https://example.com/10/aabbe" }));
+    expect(claim.doi).toBeUndefined();
+  });
+
+  it("still prefers a real DOI in the url field over the shortDOI branch", () => {
+    const { claim } = buildClaim(
+      entry({ title: "T", url: "https://doi.org/10.1038/s41586-020-2649-2" }),
+    );
+    expect(claim.doi).toBe("10.1038/s41586-020-2649-2");
+  });
+
+  it("leaves a plain DOI unchanged, including its case", () => {
+    const { claim } = buildClaim(entry({ title: "T", doi: "10.1002/PMIC.201400515" }));
+    expect(claim.doi).toBe("10.1002/PMIC.201400515");
+  });
+});

@@ -151,12 +151,25 @@ function parseYear(raw: string | undefined): number | null {
   return Number.isFinite(year) ? year : null;
 }
 
+// A shortDOI (`10/aabbe`, minted at shortdoi.org) is a Handle ALIAS for a full
+// DOI. It has no registrant segment, so it fails a `startsWith("10.")` test and
+// a `10\.\d{4,9}/` regex. The API expands it server-side, but only if we send
+// it — dropping it here means a `.bib` entry with a perfectly good shortDOI is
+// reported as "unverifiable". Token must contain a letter, which is what keeps
+// a path fragment like `10/2020` out.
+const SHORTDOI_RE = /^10\/(?=[a-z0-9]{4,20}$)[a-z0-9]*[a-z][a-z0-9]*$/i;
+
 function normalizeDoi(raw: string | undefined): string | undefined {
   if (!raw) {
     return undefined;
   }
-  const doi = raw.trim().replace(/^https?:\/\/(dx\.)?doi\.org\//i, "");
-  return doi.startsWith("10.") ? doi : undefined;
+  const doi = raw
+    .trim()
+    .replace(/^https?:\/\/(dx\.|www\.)?(doi\.org|shortdoi\.org)\//i, "");
+  if (doi.startsWith("10.")) {
+    return doi;
+  }
+  return SHORTDOI_RE.test(doi) ? doi.toLowerCase() : undefined;
 }
 
 function extractDoiFromUrl(url: string | undefined): string | undefined {
@@ -164,7 +177,15 @@ function extractDoiFromUrl(url: string | undefined): string | undefined {
     return undefined;
   }
   const match = url.match(/10\.\d{4,9}\/[^\s"]+/);
-  return match ? match[0] : undefined;
+  if (match) {
+    return match[0];
+  }
+  // shortDOI URL form — only from a doi.org / shortdoi.org host, since a bare
+  // `10/xxxxx` path on any other site is not an identifier.
+  const short = url.match(
+    /https?:\/\/(?:dx\.|www\.)?(?:doi\.org|shortdoi\.org)\/(10\/[a-z0-9]{4,20})\b/i,
+  );
+  return short && SHORTDOI_RE.test(short[1]) ? short[1].toLowerCase() : undefined;
 }
 
 function extractArxiv(f: Record<string, string>): string | undefined {
