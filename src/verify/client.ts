@@ -21,6 +21,8 @@ export interface ClientOptions {
    * the surface attribution. See `clientTag()`.
    */
   clientVersion?: string;
+  /** Opt-in semantic title check (`options.semantic_title: true`). See README. */
+  semanticTitle?: boolean;
   signal?: AbortSignal;
 }
 
@@ -161,8 +163,15 @@ async function post<T>(
   return (await res.json()) as T;
 }
 
-export function verify(claim: Claim, opts: ClientOptions): Promise<VerifyResponse> {
-  return post<VerifyResponse>("/api/verify", { claimed: claim }, opts);
+export function verify(
+  claim: Claim,
+  opts: ClientOptions,
+): Promise<VerifyResponse> {
+  const body: { claimed: Claim; options?: { semantic_title: true } } = {
+    claimed: claim,
+  };
+  if (opts.semanticTitle) body.options = { semantic_title: true };
+  return post<VerifyResponse>("/api/verify", body, opts);
 }
 
 export function checkRetraction(

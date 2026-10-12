@@ -51,6 +51,7 @@ For higher rate limits, set `scholarSidekick.apiKey` to an `ssk_…` key from
 | `scholarSidekick.verifyOnSave` | `true` | Verify on save |
 | `scholarSidekick.checkRetraction` | `true` | Flag retractions |
 | `scholarSidekick.checkOpenAccess` | `false` | Surface OA status |
+| `scholarSidekick.semanticTitleCheck` | `false` | Opt-in semantic title check: catches one-word title swaps; flagged entries become *ambiguous*, never a fabrication |
 | `scholarSidekick.maxConcurrency` | `4` | Parallel requests |
 
 ## Development

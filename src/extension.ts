@@ -29,7 +29,10 @@ export function activate(context: vscode.ExtensionContext): void {
       : undefined;
 
   diagnostics = vscode.languages.createDiagnosticCollection("scholarSidekick");
-  statusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  statusBar = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100,
+  );
   statusBar.command = "scholarSidekick.verifyFile";
   context.subscriptions.push(diagnostics, statusBar);
 
@@ -117,6 +120,7 @@ function config(): Config {
     verifyOnSave: c.get<boolean>("verifyOnSave", true),
     checkRetraction: c.get<boolean>("checkRetraction", true),
     checkOpenAccess: c.get<boolean>("checkOpenAccess", false),
+    semanticTitle: c.get<boolean>("semanticTitleCheck", false),
     maxConcurrency: c.get<number>("maxConcurrency", 4),
   };
 }
@@ -186,9 +190,14 @@ async function verifyDocument(doc: vscode.TextDocument): Promise<void> {
 }
 
 async function verifyWorkspace(): Promise<void> {
-  const uris = await vscode.workspace.findFiles("**/*.bib", "**/node_modules/**");
+  const uris = await vscode.workspace.findFiles(
+    "**/*.bib",
+    "**/node_modules/**",
+  );
   if (uris.length === 0) {
-    void vscode.window.showInformationMessage("No .bib files found in the workspace.");
+    void vscode.window.showInformationMessage(
+      "No .bib files found in the workspace.",
+    );
     return;
   }
   for (const uri of uris) {
@@ -205,7 +214,9 @@ function updateStatusBar(counts: {
   unverifiable: number;
   errors: number;
 }): void {
-  const parts: string[] = [`$(check) ${counts.total - counts.mismatch - counts.errors}`];
+  const parts: string[] = [
+    `$(check) ${counts.total - counts.mismatch - counts.errors}`,
+  ];
   if (counts.mismatch > 0) {
     parts.push(`$(error) ${counts.mismatch} fabricated?`);
   }

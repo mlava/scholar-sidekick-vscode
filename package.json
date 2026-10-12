@@ -2,7 +2,7 @@
   "name": "scholar-sidekick-vscode",
   "displayName": "Scholar Sidekick \u2014 Citation Verifier",
   "description": "Verify your .bib bibliography for fabricated citations, retractions, and open-access status \u2014 inline, before you submit.",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "publisher": "scholar-sidekick",
   "license": "MIT",
   "engines": {
@@ -88,6 +88,11 @@
           "type": "boolean",
           "default": false,
           "description": "Surface open-access status and the best legal URL (Unpaywall). Off by default \u2014 adds an extra upstream lookup per entry."
+        },
+        "scholarSidekick.semanticTitleCheck": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Also run the opt-in semantic title check on every verified entry. A calibrated model judges whether the cited title and the resolved title describe the same work, which catches a one-word swap in a long title that string similarity misses. A flagged entry becomes *ambiguous* (review), never a fabrication. Off by default here because the judgment is not byte-repeatable on borderline titles, so a diagnostic can appear or disappear between saves."
         },
         "scholarSidekick.maxConcurrency": {
           "type": "number",

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.1.3 — 2026-10-12
+
+### Added
+
+- **Opt-in semantic title check** (`scholarSidekick.semanticTitleCheck`, off by
+  default). Sends `options.semantic_title: true` with each verification so the
+  API also judges whether the cited title and the resolved title describe the
+  same work. Catches a one-word swap in a long title ("cardiac" → "renal",
+  "with" → "without") that character similarity misses; a flagged entry is
+  reported as *ambiguous* for review, never as a fabrication. Off by default
+  because the judgment is not byte-repeatable on borderline titles, so a
+  diagnostic could appear or disappear between saves.
+
 ## 0.1.2 — 2026-08-05
 
 ### Fixed
