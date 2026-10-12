@@ -17,13 +17,13 @@ Cursor, Windsurf, and Positron): **LaTeX** authors using LaTeX Workshop and
 For each entry in a `.bib` file it calls the
 [Scholar Sidekick REST API](https://scholar-sidekick.com/docs) and surfaces:
 
-| Signal | How it shows up |
-| --- | --- |
-| 🔴 **Possible fabrication** — the title doesn't match the work at the DOI/PMID/… (the [Topaz et al. 2026](https://doi.org/10.1016/S0140-6736(26)00603-3) pattern: a real identifier with an invented title) | Error squiggle + Problems panel |
-| 🟠 **Retracted** / expression of concern (Crossref + Retraction Watch) | Warning squiggle |
-| 🔵 **Unresolved / ambiguous** identifier | Info squiggle |
-| 📂 **Open access** status + best legal URL (Unpaywall) | Hover card |
-| ✅ **Verified** | Hover card + status-bar tally |
+| Signal                                                                                                                                                                                                        | How it shows up                 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| 🔴 **Possible fabrication** — the title doesn't match the work at the DOI/PMID/… (the [Topaz et al. 2026](<https://doi.org/10.1016/S0140-6736(26)00603-3>) pattern: a real identifier with an invented title) | Error squiggle + Problems panel |
+| 🟠 **Retracted** / expression of concern (Crossref + Retraction Watch)                                                                                                                                        | Warning squiggle                |
+| 🔵 **Unresolved / ambiguous** identifier                                                                                                                                                                      | Info squiggle                   |
+| 📂 **Open access** status + best legal URL (Unpaywall)                                                                                                                                                        | Hover card                      |
+| ✅ **Verified**                                                                                                                                                                                               | Hover card + status-bar tally   |
 
 Hover any entry for the full verdict. The status bar shows a running tally:
 `📖 ✓ 36  ✗ 1 fabricated?  ⚠ 2 retracted  ⊘ 4 unverifiable`.
@@ -44,15 +44,19 @@ For higher rate limits, set `scholarSidekick.apiKey` to an `ssk_…` key from
 
 ## Settings
 
-| Setting | Default | Purpose |
-| --- | --- | --- |
-| `scholarSidekick.apiBase` | `https://scholar-sidekick.com` | API base URL |
-| `scholarSidekick.apiKey` | `""` | Optional `ssk_` bearer token |
-| `scholarSidekick.verifyOnSave` | `true` | Verify on save |
-| `scholarSidekick.checkRetraction` | `true` | Flag retractions |
-| `scholarSidekick.checkOpenAccess` | `false` | Surface OA status |
-| `scholarSidekick.semanticTitleCheck` | `false` | Opt-in semantic title check: catches one-word title swaps; flagged entries become *ambiguous*, never a fabrication |
-| `scholarSidekick.maxConcurrency` | `4` | Parallel requests |
+| Setting                              | Default                        | Purpose                                                                                                            |
+| ------------------------------------ | ------------------------------ | ------------------------------------------------------------------------------------------------------------------ |
+| `scholarSidekick.apiBase`            | `https://scholar-sidekick.com` | API base URL                                                                                                       |
+| `scholarSidekick.apiKey`             | `""`                           | Optional `ssk_` bearer token                                                                                       |
+| `scholarSidekick.verifyOnSave`       | `true`                         | Verify on save                                                                                                     |
+| `scholarSidekick.checkRetraction`    | `true`                         | Flag retractions                                                                                                   |
+| `scholarSidekick.checkOpenAccess`    | `false`                        | Surface OA status                                                                                                  |
+| `scholarSidekick.semanticTitleCheck` | `false`                        | Opt-in semantic title check: catches one-word title swaps; flagged entries become _ambiguous_, never a fabrication |
+| `scholarSidekick.maxConcurrency`     | `4`                            | Parallel requests                                                                                                  |
+
+## Releasing
+
+See [RELEASE.md](RELEASE.md): a GitHub Release publishes to Open VSX via trusted publishing; the VS Code Marketplace upload is manual.
 
 ## Development
 

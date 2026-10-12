@@ -1,0 +1,70 @@
+# Publish to Open VSX via TRUSTED PUBLISHING (OIDC) — no token secret.
+#
+# How it works: the job requests a GitHub OIDC ID token (`id-token: write`),
+# `ovsx publish --trusted-publishing` posts it to open-vsx.org, which matches
+# the token's repository / workflow-file claims against the trusted-publisher
+# registration on the `scholar-sidekick` namespace and returns a short-lived
+# token scoped to this one extension. Nothing is stored.
+#
+# One-time setup on open-vsx.org (Settings → Trusted Publishers):
+#   namespace: scholar-sidekick · provider: GitHub Actions
+#   owner: mlava · repository: scholar-sidekick-vscode · workflow: release.yml
+#   environment: (leave empty — this job sets none)
+# Registrations cannot be edited: delete and recreate to change them. The
+# `publisher` field in package.json must match the namespace's casing exactly.
+#
+# Trigger: publishing a GitHub Release (tag vX.Y.Z) — the same convention as
+# scholar-sidekick-mcp and -python. The guard below refuses a tag that does
+# not match package.json, so a stale manifest cannot ship under a new tag.
+# `workflow_dispatch` is a manual re-run for a Release whose publish failed.
+#
+# The VS Code Marketplace has no trusted publishing; that upload stays manual
+# (`npm run package` → vsce publish / web upload). The .vsix built here is
+# attached to the Release so the same artefact can be uploaded there.
+
+name: Publish (Open VSX)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    name: Build, verify, publish to Open VSX
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+
+      - name: Release tag must match package.json
+        if: github.event_name == 'release'
+        run: |
+          PKG="v$(node -p "require('./package.json').version")"
+          if [ "${GITHUB_REF_NAME}" != "$PKG" ]; then
+            echo "::error::release tag ${GITHUB_REF_NAME} != package.json ${PKG}"; exit 1
+          fi
+
+      - run: npm run lint
+      - run: npm run compile
+      - run: npm test
+
+      - name: Package .vsix
+        run: npx vsce package --out scholar-sidekick-vscode.vsix
+
+      - name: Publish to Open VSX (trusted publishing)
+        run: npx ovsx publish --trusted-publishing --packagePath scholar-sidekick-vscode.vsix
+
+      - name: Attach the .vsix to the Release
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${GITHUB_REF_NAME}" scholar-sidekick-vscode.vsix --clobber
