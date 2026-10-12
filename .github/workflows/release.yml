@@ -82,9 +82,24 @@ jobs:
         if: github.event_name == 'release' || inputs.openvsx
         run: npx ovsx publish --trusted-publishing --packagePath scholar-sidekick-vscode.vsix
 
+      # continue-on-error: the Marketplace's trusted-publishing policy UI is not
+      # yet exposed to every publisher (vsce #1291), and the server answers
+      # "not supported" until it is. Until then a Marketplace failure must not
+      # mask a successful Open VSX publish; the step summary says which happened.
       - name: Publish to the VS Code Marketplace (OIDC trusted publishing)
+        id: marketplace
         if: github.event_name == 'release' || inputs.marketplace
+        continue-on-error: true
         run: npx vsce publish --oidc --packagePath scholar-sidekick-vscode.vsix
+
+      - name: Marketplace outcome
+        if: github.event_name == 'release' || inputs.marketplace
+        run: |
+          if [ "${{ steps.marketplace.outcome }}" = "success" ]; then
+            echo "✅ VS Code Marketplace: published" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "⚠️ VS Code Marketplace: OIDC publish failed — no trusted-publishing policy accepted yet. Upload the attached .vsix by hand (vsce publish / publisher page)." >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       - name: Attach the .vsix to the Release
         if: github.event_name == 'release'
