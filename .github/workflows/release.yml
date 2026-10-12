@@ -30,7 +30,9 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  # `contents: write` only so the last step can attach the .vsix to the Release;
+  # the Open VSX publish needs nothing but `id-token`.
+  contents: write
   id-token: write
 
 jobs:
