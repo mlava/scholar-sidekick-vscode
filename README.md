@@ -56,7 +56,7 @@ For higher rate limits, set `scholarSidekick.apiKey` to an `ssk_…` key from
 
 ## Releasing
 
-See [RELEASE.md](RELEASE.md): a GitHub Release publishes to Open VSX via trusted publishing; the VS Code Marketplace upload is manual.
+See [RELEASE.md](RELEASE.md): a GitHub Release publishes to Open VSX and the VS Code Marketplace via trusted publishing (OIDC, no tokens).
 
 ## Development
 

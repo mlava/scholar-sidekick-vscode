@@ -18,16 +18,32 @@
 # not match package.json, so a stale manifest cannot ship under a new tag.
 # `workflow_dispatch` is a manual re-run for a Release whose publish failed.
 #
-# The VS Code Marketplace has no trusted publishing; that upload stays manual
-# (`npm run package` → vsce publish / web upload). The .vsix built here is
-# attached to the Release so the same artefact can be uploaded there.
+# The VS Code Marketplace publishes the same way: `vsce publish --oidc`
+# (vsce ≥ 4, Node ≥ 22) exchanges the GitHub OIDC token for a short-lived
+# Marketplace credential, with NO PAT fallback. One-time setup on
+# marketplace.visualstudio.com → Manage publishers → scholar-sidekick → the
+# extension's "Trusted publishing" policy: repository mlava/scholar-sidekick-vscode,
+# workflow release.yml. The .vsix built here is also attached to the Release.
+#
+# `workflow_dispatch` re-runs a failed publish for the version in package.json;
+# untick a target that already has that version (a registry refuses a
+# duplicate version, which would fail the whole job).
 
-name: Publish (Open VSX)
+name: Publish (Open VSX + VS Code Marketplace)
 
 on:
   release:
     types: [published]
   workflow_dispatch:
+    inputs:
+      openvsx:
+        description: "Publish to Open VSX"
+        type: boolean
+        default: true
+      marketplace:
+        description: "Publish to the VS Code Marketplace"
+        type: boolean
+        default: true
 
 permissions:
   # `contents: write` only so the last step can attach the .vsix to the Release;
@@ -37,13 +53,13 @@ permissions:
 
 jobs:
   publish:
-    name: Build, verify, publish to Open VSX
+    name: Build, verify, publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22 # vsce 4 (--oidc) requires Node ≥ 22
           cache: npm
       - run: npm ci
 
@@ -63,7 +79,12 @@ jobs:
         run: npx vsce package --out scholar-sidekick-vscode.vsix
 
       - name: Publish to Open VSX (trusted publishing)
+        if: github.event_name == 'release' || inputs.openvsx
         run: npx ovsx publish --trusted-publishing --packagePath scholar-sidekick-vscode.vsix
+
+      - name: Publish to the VS Code Marketplace (OIDC trusted publishing)
+        if: github.event_name == 'release' || inputs.marketplace
+        run: npx vsce publish --oidc --packagePath scholar-sidekick-vscode.vsix
 
       - name: Attach the .vsix to the Release
         if: github.event_name == 'release'
